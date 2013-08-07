@@ -1,6 +1,7 @@
 
 var swig = require("swig")
 ,   pth = require("path")
+,   fs = require("fs")
 ;
 
 // TODO
@@ -9,29 +10,48 @@ var swig = require("swig")
 // and call the right inner templates
 // precompile templates?
 
-var sources = {
-    root:   pth.resolve(pth.join(__dirname, "root"))
-,   basic:  pth.resolve(pth.join(__dirname, "basic"))
+
+// register sources and all of their templates
+var sources = {};
+
+exports.register = function (name, path) {
+    sources[name] = { path: path, html: {}, templates: {} };
+    fs.readdirSync(path)
+      .forEach(function (it) {
+          if (!/\.html$/.test(it)) return;
+          sources[name].html[it] = fs.readFileSync(pth.join(path, it), "utf8");
+      });
 };
 
-function Builder (conf) {
-    if (!conf) conf = {};
-    if (!conf.inheritance) conf.inheritance = ["root", "basic"];
-    if (conf.inheritance[0] !== "root") conf.inheritance.unshift("root");
-    swig.init({
-        root:   conf.inheritance
-                    .reverse()
-                    .map(function (it) { return sources[it]; })
-    });
-}
+exports.register("root", pth.resolve(pth.join(__dirname, "root")));
+exports.register("basic", pth.resolve(pth.join(__dirname, "basic")));
 
-// registers template sources for inheritance
-Builder.register = function (name, path) {
-    sources[name] = path;
+// handle inheritance
+exports.inheritance = ["root", "basic"];
+
+exports.init = function () {
+    if (exports.inheritance[0] !== "root") exports.inheritance.unshift("root");
+    swig.init({});
+    
+    var previousLevel;
+    for (var i = 0, n = exports.inheritance.length; i < n; i++) {
+        var level = exports.inheritance[i];
+        for (var k in sources[level].html) {
+            var content = previousLevel ? "{% extends '" + previousLevel + "/" + k + "' %}" : "";
+            content += sources[level].html[k];
+            sources[level].templates[k] = swig.compile(content, { filename: level + "/" + k});
+        }
+        previousLevel = level;
+    }
 };
 
-Builder.prototype.form = function (schema) {
-    return swig.compileFile("schema.html")({ schema: schema });
+exports.form = function (schema) {
+    // start with schema.html template that's last in inheritance
+    var tpl, idx = exports.inheritance.length;
+    while (!tpl && idx > 0) {
+        idx--;
+        tpl = sources[exports.inheritance[idx]].templates["schema.html"];
+    }
+    if (!tpl) throw new Error("No schema.html template in inheritance tree.");
+    return tpl({ schema: schema, inheritanceTop: exports.inheritance[exports.inheritance.length - 1] });
 };
-
-exports = Builder;

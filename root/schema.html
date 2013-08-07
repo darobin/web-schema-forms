@@ -4,7 +4,7 @@
     {% set field_name = field %}
     {% set current_type = schema.properties[field] %}
     {% if schema.properties[field].type == "string" %}
-      {% include "string.html" %}
+      {% include inheritanceTop + "/string.html" %}
     {% endif %}
   {% endfor %}
 {% endblock %}
