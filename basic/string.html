@@ -1,0 +1,8 @@
+
+{% extends "string.html" %}
+
+{% block string %}
+  {% block string_label %}<label>{{ current_type.description }}</label>{% endblock %}
+  {% block string_control %}<input type="text" name="{{ field_name }}" value="" id="{{ field_name }}">{% endblock %}
+  {% parent %}
+{% endblock %}
