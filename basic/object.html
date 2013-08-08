@@ -1,6 +1,6 @@
-{% import "macros/helpers.html" as h -%}
 {% block object %}
-  <fieldset class="{% block object_fieldset_class %}{% endblock %}"{% block object_fieldset_attrs %}{% endblock %}>
+  {% import "macros/helpers.html" as h -%}
+  <fieldset class="{% block object_fieldset_class %}{% endblock %}"{% block object_fieldset_attrs %}{% endblock %}{{ req(current_type) }}>
     {%- set oldPath = path -%}
     {%- set path = path ? path + "." + field_name : field_name -%}
     {% block object_legend %}

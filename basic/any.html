@@ -1,9 +1,12 @@
 {% block any %}
   {% block any_label %}
-    <label for="{{ field_name }}" class="{% block any_label_class %}{% endblock %}"{% block any_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
+    <label for="{{ field_name }}"
+           class="{% block any_label_class %}{% endblock %}"{% block any_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
   {% endblock %}
   {% block any_control %}
-    <textarea name="{{ field_name }}" id="{{ field_name }}" class="{% block any_control_class %}{% endblock %}"{% block any_control_attrs %}{% endblock %}>
+    {% import "macros/helpers.html" as h -%}
+    <textarea name="{{ field_name }}" id="{{ field_name }}"{{ req(current_type) }}
+              class="{% block any_control_class %}{% endblock %}"{% block any_control_attrs %}{% endblock %}>
     </textarea>
   {% endblock %}
   {% parent %}

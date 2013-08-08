@@ -25,3 +25,7 @@
     {%- endif %}
   {%- endfor -%}
 {%- endmacro -%}
+
+{% macro req type -%}
+  {% if type.required %} required{% endif %}
+{%- endmacro -%}
