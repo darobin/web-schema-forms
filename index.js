@@ -52,6 +52,17 @@ exports.form = function (schema) {
         idx--;
         tpl = sources[exports.inheritance[idx]].templates["schema.html"];
     }
+    var inheritanceTop = {};
+    for (var k in sources.root.html) {
+        var idx = exports.inheritance.length;
+        while (idx > 0) {
+            idx--;
+            if (sources[exports.inheritance[idx]].html[k]) {
+                inheritanceTop[k.replace(".html", "")] = exports.inheritance[idx] + "/" + k;
+                break;
+            }
+        }
+    }
     if (!tpl) throw new Error("No schema.html template in inheritance tree.");
-    return tpl({ schema: schema, inheritanceTop: exports.inheritance[exports.inheritance.length - 1] });
+    return tpl({ schema: schema, inheritanceTop: inheritanceTop });
 };
