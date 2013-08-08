@@ -1,6 +1,6 @@
 {% import "macros/helpers.html" as h -%}
 {% block schema %}
-<form{{ h.attrs( hints.form_attrs) }} class="{% block schema_form_class %}{% endblock %}">
+<form{{ h.attrs( hints.form_attrs) }} class="{% block schema_form_class %}{% endblock %}"{% block schema_form_attrs %}{% endblock %}>
   {%- parent -%}
   {%- block schema_form_actions %}
     {%- block schema_form_actions_submit %}  <input type="submit" value="Submit">{% endblock %}
