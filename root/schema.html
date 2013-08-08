@@ -1,9 +1,4 @@
+{% import "macros/helpers.html" as h -%}
 {% block schema %}
-  {%- for field in schema.properties %}
-    {%- set field_name = loop.key %}
-    {%- set current_type = field %}
-    {%- if field.type == "string" %}
-      {%- include inheritanceTop.string %}
-    {%- endif %}
-  {%- endfor -%}
+  {{ h.processObjectType(schema.properties, inheritanceTop) }}
 {% endblock %}

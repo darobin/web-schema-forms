@@ -1,5 +1,9 @@
 {% block string %}
-  {% block string_label %} <label for="{{ field_name }}">{{ current_type.description }}</label>{% endblock %}
-  {% block string_control %} <input type="text" name="{{ field_name }}" value="" id="{{ field_name }}">{% endblock %}
+  {% block string_label %}
+    <label for="{{ field_name }}" class="{% block string_label_class %}{% endblock %}"{% block string_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
+  {% endblock %}
+  {% block string_control %}
+    <input type="text" name="{{ field_name }}" id="{{ field_name }}" class="{% block string_control_class %}{% endblock %}"{% block string_control_attrs %}{% endblock %}>
+  {% endblock %}
   {% parent %}
 {% endblock %}

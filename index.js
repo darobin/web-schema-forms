@@ -31,7 +31,13 @@ exports.inheritance = ["root", "basic"];
 
 exports.init = function () {
     if (exports.inheritance[0] !== "root") exports.inheritance.unshift("root");
-    swig.init({});
+    swig.init({
+        extensions: {
+            isArray:    function (obj) {
+                return Object.prototype.toString.call(obj) === "[object Array]";
+            }
+        }
+    });
 
     // macros
     fs.readdirSync(pth.join(__dirname, "macros"))

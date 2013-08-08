@@ -3,8 +3,8 @@
 <form{{ h.attrs( hints.form_attrs) }} class="{% block schema_form_class %}{% endblock %}"{% block schema_form_attrs %}{% endblock %}>
   {%- parent -%}
   {%- block schema_form_actions %}
-    {%- block schema_form_actions_submit %}  <input type="submit" value="Submit">{% endblock %}
-    {%- block schema_form_actions_reset %}{% endblock %}
+    {%- block schema_form_submit %}  <input type="submit" value="Submit" class="{% block schema_form_submit_class %}{% endblock %}"{% block schema_form_submit_attrs %}{% endblock %}>{% endblock %}
+    {%- block schema_form_reset %}{% endblock %}
   {%- endblock -%}
 </form>
 {% endblock %}
