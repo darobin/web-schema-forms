@@ -32,6 +32,13 @@ exports.inheritance = ["root", "basic"];
 exports.init = function () {
     if (exports.inheritance[0] !== "root") exports.inheritance.unshift("root");
     swig.init({});
+
+    // macros
+    fs.readdirSync(pth.join(__dirname, "macros"))
+      .forEach(function (it) {
+          if (!/\.html$/.test(it)) return;
+          swig.compile(fs.readFileSync(pth.join(__dirname, "macros", it), "utf8"), { filename: "macros/" + it });
+      });
     
     var previousLevel;
     for (var i = 0, n = exports.inheritance.length; i < n; i++) {
@@ -45,7 +52,8 @@ exports.init = function () {
     }
 };
 
-exports.form = function (schema) {
+exports.form = function (schema, hints) {
+    if (!hints) hints = {};
     // start with schema.html template that's last in inheritance
     var tpl, idx = exports.inheritance.length;
     while (!tpl && idx > 0) {
@@ -64,5 +72,5 @@ exports.form = function (schema) {
         }
     }
     if (!tpl) throw new Error("No schema.html template in inheritance tree.");
-    return tpl({ schema: schema, inheritanceTop: inheritanceTop });
+    return tpl({ schema: schema, inheritanceTop: inheritanceTop, hints: hints });
 };

@@ -1,0 +1,7 @@
+{% macro attr name value -%}
+  {% if value %} {{ name }}="{{ value|escape }}"{% endif %}
+{%- endmacro -%}
+
+{% macro attrs obj -%}
+  {%- for val in obj %}{{ attr(loop.key, val) }}{% endfor -%}
+{%- endmacro -%}
