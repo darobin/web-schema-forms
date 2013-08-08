@@ -1,0 +1,9 @@
+{% block boolean %}
+  {% block boolean_label %}
+    <label for="{{ field_name }}" class="{% block boolean_label_class %}{% endblock %}"{% block boolean_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
+  {% endblock %}
+  {% block boolean_control %}
+    <input type="checkbox" name="{{ field_name }}" id="{{ field_name }}" class="{% block boolean_control_class %}{% endblock %}"{% block boolean_control_attrs %}{% endblock %}>
+  {% endblock %}
+  {% parent %}
+{% endblock %}

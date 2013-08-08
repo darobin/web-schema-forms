@@ -1,0 +1,9 @@
+{% block null %}
+  {% block null_label %}
+    <label for="{{ field_name }}" class="{% block null_label_class %}{% endblock %}"{% block null_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
+  {% endblock %}
+  {% block null_control %}
+    <input type="hidden" name="{{ field_name }}" id="{{ field_name }}" class="{% block null_control_class %}{% endblock %}"{% block null_control_attrs %}{% endblock %}>
+  {% endblock %}
+  {% parent %}
+{% endblock %}

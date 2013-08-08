@@ -1,0 +1,10 @@
+{% block text %}
+  {% block text_label %}
+    <label for="{{ field_name }}" class="{% block text_label_class %}{% endblock %}"{% block text_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
+  {% endblock %}
+  {% block text_control %}
+    <textarea name="{{ field_name }}" id="{{ field_name }}" class="{% block text_control_class %}{% endblock %}"{% block text_control_attrs %}{% endblock %}>
+    </textarea>
+  {% endblock %}
+  {% parent %}
+{% endblock %}
