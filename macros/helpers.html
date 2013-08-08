@@ -10,7 +10,8 @@
   {%- for field in obj %}
     {%- set field_name = loop.key %}
     {%- set current_type = field %}
-    {%- if field.type === "string"        %}{% include inheritanceTop.string %}
+    {%- if field.enum                     %}{% include inheritanceTop.enum %}
+    {%- else if field.type === "string"   %}{% include inheritanceTop.string %}
     {%- else if field.type === "text"     %}{% include inheritanceTop.text %}
     {%- else if field.type === "number"   %}{% include inheritanceTop.number %}
     {%- else if field.type === "boolean"  %}{% include inheritanceTop.boolean %}
