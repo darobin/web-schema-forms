@@ -1,10 +1,9 @@
-
 {% block schema %}
-  {% for field in schema.properties %}
-    {% set field_name = loop.key %}
-    {% set current_type = field %}
-    {% if field.type == "string" %}
-      {% include inheritanceTop.string %}
-    {% endif %}
-  {% endfor %}
+  {%- for field in schema.properties %}
+    {%- set field_name = loop.key %}
+    {%- set current_type = field %}
+    {%- if field.type == "string" %}
+      {%- include inheritanceTop.string %}
+    {%- endif %}
+  {%- endfor -%}
 {% endblock %}
