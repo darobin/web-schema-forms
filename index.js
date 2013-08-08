@@ -46,6 +46,11 @@ exports.init = function () {
           swig.compile(fs.readFileSync(pth.join(__dirname, "macros", it), "utf8"), { filename: "macros/" + it });
       });
     
+    // XXX
+    //  this will crash if there's nothing at the previous level
+    //  instead:
+    //      - look through all previous levels and use the first
+    //      - if there are none, don't extend
     var previousLevel;
     for (var i = 0, n = exports.inheritance.length; i < n; i++) {
         var level = exports.inheritance[i];
