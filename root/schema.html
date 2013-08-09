@@ -1,4 +1,4 @@
 {% import "macros/helpers.html" as h -%}
 {% block schema %}
-  {{ h.processObjectType(schema.properties, inheritanceTop) }}
+  {{ h.processObjectType(schema.properties, inheritanceTop, hints) }}
 {% endblock %}

@@ -1,4 +1,3 @@
-{% import "macros/helpers.html" as h -%}
 {% block object %}
-  {{ h.processObjectType(current_type.properties, inheritanceTop) }}
+  {{ processObjectType(current_type.properties, inheritanceTop) }}
 {% endblock %}

@@ -6,10 +6,12 @@
   {%- for val in obj %}{{ attr(loop.key, val) }}{% endfor -%}
 {%- endmacro -%}
 
-{% macro processObjectType obj inheritanceTop -%}
+{% macro processObjectType obj inheritanceTop hints -%}
   {%- for field in obj %}
     {%- set field_name = loop.key %}
     {%- set current_type = field %}
+    {%- set inheritanceTop = inheritanceTop %}
+    {%- set hints = hints %}
     {%- if field.enum                     %}{% include inheritanceTop.enum %}
     {%- else if field.type === "string"   %}{% include inheritanceTop.string %}
     {%- else if field.type === "text"     %}{% include inheritanceTop.text %}

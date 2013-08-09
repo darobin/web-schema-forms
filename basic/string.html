@@ -4,7 +4,6 @@
            class="{% block string_label_class %}{% endblock %}"{% block string_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
   {% endblock %}
   {% block string_control %}
-    {% import "macros/helpers.html" as h -%}
     <input type="text" name="{{ field_name }}" id="{{ field_name }}"{{ req(current_type) }}
            class="{% block string_control_class %}{% endblock %}"{% block string_control_attrs %}{% endblock %}
            {{ attr("pattern", current_type.pattern) }}{{ attr("minlength", current_type.minLength) }}{{ attr("maxlength", current_type.maxLength) }}>

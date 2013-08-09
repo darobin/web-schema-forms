@@ -4,7 +4,6 @@
            class="{% block number_label_class %}{% endblock %}"{% block number_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
   {% endblock %}
   {% block number_control %}
-    {% import "macros/helpers.html" as h -%}
     <input type="text" name="{{ field_name }}" id="{{ field_name }}"{{ req(current_type) }}
            class="{% block number_control_class %}{% endblock %}"{% block number_control_attrs %}{% endblock %}
            {{ attr("min", current_type.minimum) }}{{ attr("max", current_type.maximum) }}>
