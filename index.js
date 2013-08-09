@@ -19,6 +19,11 @@ exports.register = function (name, path) {
 exports.register("root", pth.resolve(pth.join(__dirname, "root")));
 exports.register("basic", pth.resolve(pth.join(__dirname, "basic")));
 
+// plugins
+exports.loadPlugin = function (plugin) {
+    plugin.init(this);
+};
+
 // helper
 function isArray (obj) {
     return Object.prototype.toString.call(obj) === "[object Array]";
