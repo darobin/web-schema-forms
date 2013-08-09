@@ -1,10 +1,10 @@
 {% block enum %}
   {% block enum_label %}
-    <label for="{{ field_name }}"
+    <label for="{{ id(path, field_name) }}"
            class="{% block enum_label_class %}{% endblock %}"{% block enum_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
   {% endblock %}
   {% block enum_control %}
-    <select name="{{ field_name }}" id="{{ field_name }}"{{ req(current_type) }}
+    <select name="{{ id(path, field_name) }}" id="{{ id(path, field_name) }}"{{ req(current_type) }}
             class="{% block enum_control_class %}{% endblock %}"{% block enum_control_attrs %}{% endblock %}>
       {% if !current_type.required %}<option></option>{% endif %}
       {% for item in current_type.enum %}

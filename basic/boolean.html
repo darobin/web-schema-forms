@@ -1,10 +1,10 @@
 {% block boolean %}
   {% block boolean_label %}
-    <label for="{{ field_name }}"
+    <label for="{{ id(path, field_name) }}"
            class="{% block boolean_label_class %}{% endblock %}"{% block boolean_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
   {% endblock %}
   {% block boolean_control %}
-    <input type="checkbox" name="{{ field_name }}" id="{{ field_name }}"{{ req(current_type) }}
+    <input type="checkbox" name="{{ id(path, field_name) }}" id="{{ id(path, field_name) }}"{{ req(current_type) }}
            class="{% block boolean_control_class %}{% endblock %}"{% block boolean_control_attrs %}{% endblock %}>
   {% endblock %}
   {% parent %}

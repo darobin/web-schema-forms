@@ -1,10 +1,10 @@
 {% block string %}
   {% block string_label %}
-    <label for="{{ field_name }}"
+    <label for="{{ id(path, field_name) }}"
            class="{% block string_label_class %}{% endblock %}"{% block string_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
   {% endblock %}
   {% block string_control %}
-    <input type="text" name="{{ field_name }}" id="{{ field_name }}"{{ req(current_type) }}
+    <input type="text" name="{{ id(path, field_name) }}" id="{{ id(path, field_name) }}"{{ req(current_type) }}
            class="{% block string_control_class %}{% endblock %}"{% block string_control_attrs %}{% endblock %}
            {{ attr("pattern", current_type.pattern) }}{{ attr("minlength", current_type.minLength) }}{{ attr("maxlength", current_type.maxLength) }}>
   {% endblock %}
