@@ -3,6 +3,6 @@
 ,   "version":  "0.0.1"
 ,   "license": "MIT"
 ,   "dependencies": {
-        "swig":                 "0.14.0"
+        "swig":     "git://github.com/darobin/swig#parent-loses-context"
     }
 }

@@ -1,3 +1,4 @@
+/*jshint es5: true*/
 
 var swig = require("swig")
 ,   pth = require("path")
@@ -92,5 +93,51 @@ exports.form = function (inheritance, schema, hints) {
         inheritanceTop[html.replace(".html", "")] = findInherit(inheritance.length, html, "file");
     }
 
-    return tpl({ schema: schema, inheritanceTop: inheritanceTop, hints: hints });
+    // recursively render the content
+    // we don't do this in Swig because it causes hairy things to sprout
+    function templateForType (field) {
+        var idx = inheritance.length;
+        if (field.enum)                     return findInherit(idx, "enum.html", "template");
+        else if (field.type === "string")   return findInherit(idx, "string.html", "template");
+        else if (field.type === "text")     return findInherit(idx, "text.html", "template");
+        else if (field.type === "number")   return findInherit(idx, "number.html", "template");
+        else if (field.type === "boolean")  return findInherit(idx, "boolean.html", "template");
+        else if (field.type === "null")     return findInherit(idx, "null.html", "template");
+        else if (field.type === "link")     return findInherit(idx, "link.html", "template");
+        else if (field.type === "any")      return findInherit(idx, "any.html", "template");
+        else if (!field.type)               return findInherit(idx, "any.html", "template");
+        else if (isArray(field.type))       return findInherit(idx, "union.html", "template");
+        else if (field.type === "object")   return findInherit(idx, "object.html", "template");
+        else if (field.type === "array")    return findInherit(idx, "array.html", "template");
+        else throw new Error("Unknown schema field type " + field.type + ".");
+    }
+    
+    function renderContent (obj) {
+        var content = "";
+        for (var field_name in obj) {
+            var field = obj[field_name]
+            ,   tpl = templateForType(field)
+            ,   subcontent
+            ;
+            if (field.type === "object") subcontent = renderContent(field.properties);
+            else if (isArray(field.type)) subcontent = "XXX union not yet supported XXX";
+            else if (field.type === "array") subcontent = "XXX array not yet supported XXX";
+            content += tpl({
+                            schema:         schema
+                        ,   inheritanceTop: inheritanceTop
+                        ,   hints:          hints
+                        ,   content:        subcontent
+                        ,   current_type:   field
+                        ,   field_name:     field_name
+                        });
+        }
+        return content;
+    }
+
+    return tpl({
+                schema:         schema
+            ,   inheritanceTop: inheritanceTop
+            ,   hints:          hints
+            ,   content:        renderContent(schema.properties)
+            });
 };

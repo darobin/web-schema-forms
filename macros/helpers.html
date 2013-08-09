@@ -6,29 +6,6 @@
   {%- for val in obj %}{{ attr(loop.key, val) }}{% endfor -%}
 {%- endmacro -%}
 
-{% macro processObjectType obj inheritanceTop hints -%}
-  {%- for field in obj %}
-    {%- set field_name = loop.key %}
-    {%- set current_type = field %}
-    {%- set inheritanceTop = inheritanceTop %}
-    {%- set hints = hints %}
-    {%- if field.enum                     %}{% include inheritanceTop.enum %}
-    {%- else if field.type === "string"   %}{% include inheritanceTop.string %}
-    {%- else if field.type === "text"     %}{% include inheritanceTop.text %}
-    {%- else if field.type === "number"   %}{% include inheritanceTop.number %}
-    {%- else if field.type === "boolean"  %}{% include inheritanceTop.boolean %}
-    {%- else if field.type === "null"     %}{% include inheritanceTop.null %}
-    {%- else if field.type === "link"     %}{% include inheritanceTop.link %}
-    {%- else if field.type === "any"      %}{% include inheritanceTop.any %}
-    {%- else if !field.type               %}{% include inheritanceTop.any %}
-    {%- else if _ext.toArray(field.type)  %}{% include inheritanceTop.union %}
-    {%- else if field.type === "object"   %}{% include inheritanceTop.object %}
-    {%- else if field.type === "array"    %}{% include inheritanceTop.array %}
-    {%- else %}Unknown schema field type '{{ field.type }}'.
-    {%- endif %}
-  {%- endfor -%}
-{%- endmacro -%}
-
 {% macro req type -%}
   {% if type.required %} required{% endif %}
 {%- endmacro -%}
