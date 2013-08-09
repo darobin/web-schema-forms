@@ -4,7 +4,7 @@
     {%- set oldPath = path -%}
     {%- set path = path ? path + "." + field_name : field_name -%}
     {% block object_legend %}
-      <label for="{{ field_name }}" class="{% block object_label_class %}{% endblock %}"{% block object_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
+      <legend class="{% block object_legend_class %}{% endblock %}"{% block object_legend_attrs %}{% endblock %}>{{ current_type.description }}</legend>
     {% endblock %}
     {% parent %}
     {%- set path = oldPath -%}

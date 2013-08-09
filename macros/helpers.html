@@ -1,5 +1,5 @@
 {% macro attr name value -%}
-  {% if value %} {{ name }}="{{ value|escape }}"{% endif %}
+  {% if value != null %} {{ name }}="{{ value|escape }}"{% endif %}
 {%- endmacro -%}
 
 {% macro attrs obj -%}
