@@ -6,7 +6,8 @@
   {% block text_control %}
     {% import "macros/helpers.html" as h -%}
     <textarea name="{{ field_name }}" id="{{ field_name }}"{{ req(current_type) }}
-              class="{% block text_control_class %}{% endblock %}"{% block text_control_attrs %}{% endblock %}>
+              class="{% block text_control_class %}{% endblock %}"{% block text_control_attrs %}{% endblock %}
+              {{ attr("pattern", current_type.pattern) }}{{ attr("minlength", current_type.minLength) }}{{ attr("maxlength", current_type.maxLength) }}>
     </textarea>
   {% endblock %}
   {% parent %}
