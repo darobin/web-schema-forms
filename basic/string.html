@@ -1,4 +1,5 @@
 {% block string %}
+  {% block string_header %}{% endblock %}
   {% block string_label %}
     <label for="{{ id(path, field_name) }}"
            class="{% block string_label_class %}{% endblock %}"{% block string_label_attrs %}{% endblock %}>{{ current_type.description }}</label>
@@ -9,4 +10,5 @@
            {{ attr("pattern", current_type.pattern) }}{{ attr("minlength", current_type.minLength) }}{{ attr("maxlength", current_type.maxLength) }}>
   {% endblock %}
   {% parent %}
+  {% block string_footer %}{% endblock %}
 {% endblock %}
