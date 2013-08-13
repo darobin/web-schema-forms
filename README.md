@@ -9,19 +9,29 @@ schemata are either very limited, or when they have advanced features they tend 
 client-side dependencies that might not match what you prefer to use in your system. It can also
 be difficult to modify or enhance the behaviour of generated forms. This package tries very hard to
 work around those problems in order to enable the generic form generator. It does this by relying
-on the powerful Swig templating system, that notably supports very flexible template inheritance
-and extensions.
+on jQuery (on the server side) to make it easy for extensions to simply enhance the markup. There
+are of course limits to how flexible this approach is, and if an extension modifies the markup too
+much others won't be able to bring their enhancements. But if you apply sane changes and are a
+little bit defensive in terms of what you expect to find in the tree, you can easily extend the
+form generation.
 
 ## Example usage
 
-    var wsf = require("web-schema-forms");
-    wsf.loadPlugin(require("web-schema-forms-bootstrap"));
+    var wsf = require("web-schema-forms")
+    ,   bootstrap = require("web-schema-forms-bootstrap")
+    ,   bootstrap = require("web-schema-forms-angular")
+    ;
 
-    var form = WSF.form(["basic", "bootstrap"],
-                        {
-                          // web schema...
+    var form = WSF.form({
+                            extensions: [bootstrap.horizontal, angular]
+                        ,   schema: { ... } // web schema
+                        ,   hints:  { ... } // rendering hints
                         }
-    ));
+                    ,   function (err, form) {
+                            if (err) return console.log("ERROR", err);
+                            // use the form here, it's just generated HTML
+                        }
+    );
 
 ## Installation
 
@@ -29,65 +39,36 @@ and extensions.
 
 ## API
 
-### form([inheritance], schema, [hints])
+### form(context, callback)
 
 This is the core functionality that takes a schema and returns a string representing an HTML
-form. (Note that there is nothing HTML-specific in the fundamental code; if you produce a set of
-templates that inherits directly from ```root``` instead of ```basic``` then you can generate pretty
-much anything you want from a schema.)
+form.
 
-It takes three parameters, the first and last of which are optional:
-* ```inheritance```. An array that describes the inheritance line of templates. If left unspecified,
-  defaults to ```["root", "basic"]``` which will produce very bare bones HTML. If you wanted to use
-  the Bootstrap and AngulasJS plugins together (so that your forms use both of these technologies)
-  then you would specify ```["basic", "bootstrap", "angular"]``` (the order of the two latter does
-  not matter much). You don't need to start with ```root```, it gets added for you.
-* ```schema```. A Web Schema. Note that Web Schema is still evolving technology at this time, and
-  so this package will evolve to match. Breaking changes are still possible.
-* ```hints```. Optionally some hints can be provided in order to better control the behaviour of the
-  templates. Currently the only supported hint is ```form_attrs``` which is an object the keys and
-  values of which produce attributes on the ```<form>``` element. More hints will be added so that
-  the templating behaviour can be modified without having to write templates.
+It takes two parameters:
+* ```context```. A configuration object that defines the processing that must happen (and is also
+  passed to items in the pipeline). It is comprised of the following fields:
+    * ```schema```. A Web Schema. Note that Web Schema is still evolving technology at this time,
+      and so this package will evolve to match. Breaking changes are still possible.
+    * ```hints```. Optionally some hints can be provided in order to better control the behaviour of
+      the templates. Currently the only supported hint is ```form_attrs``` which is an object the
+      keys and values of which produce attributes on the ```<form>``` element. More hints will be 
+      added so that the templating behaviour can be modified without having to write templates. Note
+      that extensions are likely to add their own hints.
+    * ```extensions```. An array of functions that will be called in turn with the context and a
+      callback. The context is the one that was passed, plus a number of useful additional fields
+      that are described in the Extensions section below.
+* ```callback```. A callback that gets called with an error (null on success) and a string that is
+  the generated form.
 
-### register(name, path)
+## Extensions
 
-This registers a source of templates. Typically a plugin will call that in order to tell Web Schema
-Forms where its templates are, and for what key.
+Extensions are functions that are given a context object and a callback. They may perform their
+processing asynchronously if they need to, before calling the callback.
 
-If you write your own extensions, you can call this directly to add your set of templates, without
-having to create a plugin.
+The context object has the same fields described above (and anything else you provide to 
+```form()```), with the following ones added:
+* ```$```. A jQuery object to manipulate the given document.
+* ```$form```. The form object being generated. Note that normally you only need to worry about this
+  but not about the rest of the document.
 
-Parameters:
-* ```name```. The simple name for that template set, like ```root``` or ```basic```.
-* ```path```. The path to the directory containing the templates.
-
-### loadPlugin(plugin)
-
-Load a plugin by specifying the plugin object. A plugin can be absolutely any object that responds
-to the API defined in the next section (it does not need to be a module for instance). Note that
-unless you want to somehow package and distribute them, you do not need to create a plugin in order
-to produce extensions; you can simply register your templates directly.
-
-Parameters:
-* ```plugin```. A plugin object.
-
-## Plugin API
-
-The plugin API is extremely simple. A typical plugin will mostly be composed of templates, with the
-code simply serving as glue.
-
-### init(wsf)
-
-Takes a Web Schema Forms instance and isn't expected to return anything. In the typical case, it
-will simply call ```register()``` on the provided object in order to configure the location of its
-templates set.
-
-## Writing plugins
-
-Most of the complexity involved in plugins is in the writing of forms.
-
-XXX
-  - link to Swig
-  - don't use extend, and use special import
-  - available information: schema, hints, path
-
+The callback expects to be called with an error (null on success) and a context.

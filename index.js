@@ -16,13 +16,13 @@ function makePath (context) {
 }
 
 function addDivAndLabel (context, type, annot) {
-    var $ = context.window.$
+    var $ = context.$
     ,   $div = $("<div></div>")
     ,   $label = $("<label></label>")
     ;
     $div.attr("data-wsf-type", annot);
     $label.attr("for", makePath(context)).text(type.description).appendTo($div);
-    context.$form.append($div);
+    context.$current.append($div);
     return $div;
 }
 
@@ -31,7 +31,7 @@ function attrsIfExist ($el, obj) {
 }
 
 function basicInput (state, context, type, $parent, attrsMap) {
-    var $input = state === "textarea" ? context.window.$("<textarea></textarea>") : context.window.$("<input>")
+    var $input = state === "textarea" ? context.$("<textarea></textarea>") : context.$("<input>")
     ,   path = makePath(context)
     ,   attrsMap = attrsMap ? attrsMap : {}
     ;
@@ -44,7 +44,7 @@ function basicInput (state, context, type, $parent, attrsMap) {
 }
 
 function renderType (context, type) {
-    var $ = context.window.$
+    var $ = context.$
     ,   path = makePath(context)
     ;
     if (type.enum) {
@@ -87,11 +87,11 @@ function renderType (context, type) {
     else if (!type.type)            { throw new Error("Type any not yet supported"); } // XXX
     else if (isArray(type.type))    { throw new Error("Type union not yet supported"); } // XXX
     else if (type.type === "object") {
-        var $oldForm;
+        var $oldCurrent;
         if (path !== "$root") {
-            $oldForm = context.$form;
-            context.$form = $("<fieldset data-wsf-type='object'></fieldset>").attr("id", path).appendTo($oldForm);
-            $("<legend></legend>").text(type.description).appendTo(context.$form);
+            $oldCurrent = context.$current;
+            context.$current = $("<fieldset data-wsf-type='object'></fieldset>").attr("id", path).appendTo($oldCurrent);
+            $("<legend></legend>").text(type.description).appendTo(context.$current);
         }
         for (var name in type.properties) {
             if (type.properties.hasOwnProperty(name)) {
@@ -101,8 +101,8 @@ function renderType (context, type) {
             }
         }
         if (path !== "$root") {
-            context.$form = $oldForm;
-            $oldForm = null;
+            context.$current = $oldCurrent;
+            $oldCurrent = null;
         }
     }
     else if (type.type === "array") { throw new Error("Type array not yet supported"); } // XXX
@@ -119,8 +119,9 @@ function basic (context, cb) {
         ;
         $("body").append("<div id='wsf'></div>");
         $("#wsf").append($form);
-        context.window = win;
+        context.$ = win.$;
         context.$form = $form;
+        context.$current = $form;
         if (context.hints.form_attrs) $form.attr(context.hints.form_attrs);
         try {
             renderType(context, context.schema);
@@ -138,11 +139,11 @@ exports.form = function (context, cb) {
     context.path = [];
     if (!context.schema) cb(new Error("Missing required schema."));
     if (!context.hints) context.hints = {};
-    if (!context.pipeline) context.pipeline = [];
-    context.pipeline.unshift(function (cb) { basic(context, cb); });
-    async.waterfall(context.pipeline, function (err, context) {
+    if (!context.extensions) context.extensions = [];
+    context.extensions.unshift(function (cb) { basic(context, cb); });
+    async.waterfall(context.extensions, function (err, context) {
         if (err) return cb(err);
-        if (!context.window) return cb(new Error("Failed to produce a document."));
-        cb(null, context.window.$("#wsf").html().replace(/<div/g, "\n  <div"));
+        if (!context.$form) return cb(new Error("Failed to produce a document."));
+        cb(null, context.$form.parent().html().replace(/<div/g, "\n  <div"));
     });
 };
