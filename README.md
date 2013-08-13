@@ -19,7 +19,7 @@ form generation.
 
     var wsf = require("web-schema-forms")
     ,   bootstrap = require("web-schema-forms-bootstrap")
-    ,   bootstrap = require("web-schema-forms-angular")
+    ,   angular = require("web-schema-forms-angular")
     ;
 
     var form = WSF.form({
