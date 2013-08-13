@@ -1,6 +1,0 @@
-{% block object %}
-  {%- set oldPath = path -%}
-  {% if path %}{% set path = path + "." + field_name %}{% else %}{% set path = field_name %}{% endif %}
-  {{ processObjectType(current_type.properties, inheritanceTop, hints) }}
-  {%- set path = oldPath -%}
-{% endblock %}

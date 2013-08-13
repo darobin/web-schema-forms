@@ -1,143 +1,135 @@
 /*jshint es5: true*/
 
-var swig = require("swig")
+var jsdom = require("jsdom")
+,   async = require("async")
 ,   pth = require("path")
-,   fs = require("fs")
+// ,   fs = require("fs")
 ;
 
-// register sources and all of their templates
-var sources = {};
 
-exports.register = function (name, path) {
-    sources[name] = { path: path, html: {}, templates: {} };
-    fs.readdirSync(path)
-      .forEach(function (it) {
-          if (!/\.html$/.test(it)) return;
-          sources[name].html[it] = fs.readFileSync(pth.join(path, it), "utf8");
-      });
-};
-
-exports.register("root", pth.resolve(pth.join(__dirname, "root")));
-exports.register("basic", pth.resolve(pth.join(__dirname, "basic")));
-
-// plugins
-exports.loadPlugin = function (plugin) {
-    plugin.init(this);
-};
-
-// helper
+// helpers
 function isArray (obj) {
     return Object.prototype.toString.call(obj) === "[object Array]";
 }
 
-exports.form = function (inheritance, schema, hints) {
-    // the first parameter is optional
-    if (!isArray(inheritance)) {
-        schema = inheritance;
-        hints = schema;
-        inheritance = ["root", "basic"];
-    }
-    if (!schema) throw new Error("Can't convert schema if no schema is given.");
-    if (!hints) hints = {};
-    if (inheritance[0] !== "root") inheritance.unshift("root");
-    swig.init({
-        extensions: {
-            isArray: isArray
-        }
-    });
+function makePath (context) {
+    if (!context.path.length) return "$root";
+    return context.path.join(".");
+}
 
-    // finds what template to inherit from
-    function findInherit (start, file, want) {
-        while (start > 0) {
-            start--;
-            if (sources[inheritance[start]].html[file]) {
-                if (want === "file") return inheritance[start] + "/" + file;
-                if (want === "html") return sources[inheritance[start]].html[file];
-                if (want === "template") return sources[inheritance[start]].templates[file];
-                if (want === "source") return inheritance[start];
+function addDivAndLabel (context, type, annot) {
+    var $ = context.window.$
+    ,   $div = $("<div></div>")
+    ,   $label = $("<label></label>")
+    ;
+    $div.attr("data-wsf-type", annot);
+    $label.attr("for", makePath(context)).text(type.description).appendTo($div);
+    context.$form.append($div);
+    return $div;
+}
+
+function attrsIfExist ($el, obj) {
+    for (var k in obj) {
+        if (obj.hasOwnProperty(k) && obj[k] != null) $el.attr(k, obj[k]);
+    }
+}
+
+function basicInput (state, context, type, $parent, attrsMap) {
+    var $input = context.window.$("<input>")
+    ,   path = makePath(context)
+    ;
+    $input.attr("type", state);
+    $input.attr({ id: path, name: path });
+    attrsMap.required = type.required ? "required" : null;
+    attrsIfExist($input, attrsMap);
+    $parent.append($input);
+    return $input;
+}
+
+function renderType (context, type) {
+    var $ = context.window.$
+    ,   path = makePath(context)
+    ;
+    if (type.enum)                     1; // XXX
+    else if (type.type === "string") {
+        var $div = addDivAndLabel(context, type, type.type);
+        basicInput("text", context, type, $div, {
+            pattern:    type.pattern
+        ,   minlength:  type.minLength
+        ,   maxlength:  type.maxLength
+        });
+    }
+    else if (type.type === "text")     1; // XXX
+    else if (type.type === "number") {
+        var $div = addDivAndLabel(context, type, type.type);
+        basicInput("number", context, type, $div, {
+            min:    type.minimum
+        ,   max:    type.maximum
+        });
+    }
+    else if (type.type === "boolean")  1; // XXX
+    else if (type.type === "null")     1; // XXX
+    else if (type.type === "link")     1; // XXX
+    else if (type.type === "any")      1; // XXX
+    else if (!type.type)               1; // XXX
+    else if (isArray(type.type))       1; // subcontent union
+    else if (type.type === "object") {
+        var $oldForm;
+        if (path !== "$root") {
+            $oldForm = context.$form;
+            context.$form = $("<fieldset data-wsf-type='object'></fieldset>").attr("id", path).appendTo($oldForm);
+            $("<legend></legend>").text(type.description).appendTo(context.$form);
+        }
+        for (var name in type.properties) {
+            if (type.properties.hasOwnProperty(name)) {
+                context.path.push(name);
+                renderType(context, type.properties[name]);
+                context.path.pop();
             }
         }
-        return null;
-    }
-
-    // macros
-    fs.readdirSync(pth.join(__dirname, "macros"))
-      .forEach(function (it) {
-          if (!/\.html$/.test(it)) return;
-          swig.compile(fs.readFileSync(pth.join(__dirname, "macros", it), "utf8"), { filename: "macros/" + it });
-      });
-
-    // for each template from each source, make it inherit from its real parent (if any)
-    for (var idx = 0, n = inheritance.length; idx < n; idx++) {
-        var src = sources[inheritance[idx]];
-        for (var k in src.html) {
-            var parent = findInherit(idx, k, "file")
-            ,   content = (parent ? "{% extends '" + parent + "' %}" : "") + src.html[k]
-            ;
-            src.templates[k] = swig.compile(content, { filename: inheritance[idx] + "/" + k});
+        if (path !== "$root") {
+            context.$form = $oldForm;
+            $oldForm = null;
         }
     }
+    else if (type.type === "array")    1; // subcontent array
+    else throw new Error("Unknown schema field type " + type.type + ".");
+}
 
-    // start with schema.html template that's last in inheritance
-    var tpl = findInherit(inheritance.length, "schema.html", "template");
-    if (!tpl) throw new Error("No schema.html template in inheritance tree.");
-
-    // need to list all templates at all levels, and for each find the topmost
-    var inheritanceTop = {}, allHTML = {}, listHTML = [];
-    for (var i = 0, n = inheritance.length; i < n; i++) {
-        for (var k in sources[inheritance[i]].html) allHTML[k] = true;
-    }
-    for (var k in allHTML) listHTML.push(k);
-    for (var i = 0, n = listHTML.length; i < n; i++) {
-        var html = listHTML[i];
-        inheritanceTop[html.replace(".html", "")] = findInherit(inheritance.length, html, "file");
-    }
-
-    // recursively render the content
-    // we don't do this in Swig because it causes hairy things to sprout
-    function templateForType (field) {
-        var idx = inheritance.length;
-        if (field.enum)                     return findInherit(idx, "enum.html", "template");
-        else if (field.type === "string")   return findInherit(idx, "string.html", "template");
-        else if (field.type === "text")     return findInherit(idx, "text.html", "template");
-        else if (field.type === "number")   return findInherit(idx, "number.html", "template");
-        else if (field.type === "boolean")  return findInherit(idx, "boolean.html", "template");
-        else if (field.type === "null")     return findInherit(idx, "null.html", "template");
-        else if (field.type === "link")     return findInherit(idx, "link.html", "template");
-        else if (field.type === "any")      return findInherit(idx, "any.html", "template");
-        else if (!field.type)               return findInherit(idx, "any.html", "template");
-        else if (isArray(field.type))       return findInherit(idx, "union.html", "template");
-        else if (field.type === "object")   return findInherit(idx, "object.html", "template");
-        else if (field.type === "array")    return findInherit(idx, "array.html", "template");
-        else throw new Error("Unknown schema field type " + field.type + ".");
-    }
+// basic processor
+function basic (context, cb) {
+    var win = jsdom.jsdom().parentWindow;
+    jsdom.jQueryify(win, pth.resolve(pth.join(__dirname, "vendor/jquery-2.0.3.min.js")), function () {
+        // make a form
+        var $ = win.$
+        ,   $form = $("<form></form>")
+        ;
+        $("body").append("<div id='wsf'></div>");
+        $("#wsf").append($form);
+        context.window = win;
+        context.$form = $form;
+        if (context.hints.form_attrs) $form.attr(context.hints.form_attrs);
+        try {
+            renderType(context, context.schema);
+        }
+        catch (e) {
+            return cb(e);
+        }
+        $form.append($('<div data-wsf-type="actions"><input type="submit" value="Submit"></div>'));
+        cb(null, context);
+    });
     
-    function renderContent (obj) {
-        var content = "";
-        for (var field_name in obj) {
-            var field = obj[field_name]
-            ,   tpl = templateForType(field)
-            ,   subcontent
-            ;
-            if (field.type === "object") subcontent = renderContent(field.properties);
-            else if (isArray(field.type)) subcontent = "XXX union not yet supported XXX";
-            else if (field.type === "array") subcontent = "XXX array not yet supported XXX";
-            content += tpl({
-                            schema:         schema
-                        ,   inheritanceTop: inheritanceTop
-                        ,   hints:          hints
-                        ,   content:        subcontent
-                        ,   current_type:   field
-                        ,   field_name:     field_name
-                        });
-        }
-        return content;
-    }
+}
 
-    return tpl({
-                schema:         schema
-            ,   inheritanceTop: inheritanceTop
-            ,   hints:          hints
-            ,   content:        renderContent(schema.properties)
-            });
+exports.form = function (context, cb) {
+    context.path = [];
+    if (!context.schema) cb(new Error("Missing required schema."));
+    if (!context.hints) context.hints = {};
+    if (!context.pipeline) context.pipeline = [];
+    context.pipeline.unshift(function (cb) { basic(context, cb); });
+    async.waterfall(context.pipeline, function (err, context) {
+        if (err) return cb(err);
+        if (!context.window) return cb(new Error("Failed to produce a document."));
+        cb(null, context.window.$("#wsf").html().replace(/<div/g, "\n  <div"));
+    });
 };
