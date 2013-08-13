@@ -1,9 +1,0 @@
-{% block object %}
-  <fieldset class="{% block object_fieldset_class %}{% endblock %}"{% block object_fieldset_attrs %}{% endblock %}{{ req(current_type) }}
-            id="{{ id(path, field_name) }}">
-    {% block object_legend %}
-      <legend class="{% block object_legend_class %}{% endblock %}"{% block object_legend_attrs %}{% endblock %}>{{ current_type.description }}</legend>
-    {% endblock %}
-    {% parent %}
-  </fieldset>
-{% endblock %}

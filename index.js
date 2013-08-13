@@ -3,9 +3,7 @@
 var jsdom = require("jsdom")
 ,   async = require("async")
 ,   pth = require("path")
-// ,   fs = require("fs")
 ;
-
 
 // helpers
 function isArray (obj) {
@@ -29,16 +27,15 @@ function addDivAndLabel (context, type, annot) {
 }
 
 function attrsIfExist ($el, obj) {
-    for (var k in obj) {
-        if (obj.hasOwnProperty(k) && obj[k] != null) $el.attr(k, obj[k]);
-    }
+    for (var k in obj) if (obj.hasOwnProperty(k) && obj[k] != null) $el.attr(k, obj[k]);
 }
 
 function basicInput (state, context, type, $parent, attrsMap) {
-    var $input = context.window.$("<input>")
+    var $input = state === "textarea" ? context.window.$("<textarea></textarea>") : context.window.$("<input>")
     ,   path = makePath(context)
+    ,   attrsMap = attrsMap ? attrsMap : {}
     ;
-    $input.attr("type", state);
+    if (state !== "textarea") $input.attr("type", state);
     $input.attr({ id: path, name: path });
     attrsMap.required = type.required ? "required" : null;
     attrsIfExist($input, attrsMap);
@@ -50,16 +47,26 @@ function renderType (context, type) {
     var $ = context.window.$
     ,   path = makePath(context)
     ;
-    if (type.enum)                     1; // XXX
-    else if (type.type === "string") {
+    if (type.enum) {
+        var $div = addDivAndLabel(context, type, "enum-" + type.type)
+        ,   $select = $("<select></select>")
+        ;
+        $select.attr({ id: path, name: path });
+        if (type.required)  $select.attr("required", "required");
+        else                $select.append("<option></option>");
+        for (var i = 0, n = type.enum.length; i < n; i++) {
+            $("<option></option>").text(type.enum[i]).appendTo($select);
+        }
+        $div.append($select);
+    }
+    else if (type.type === "string" || type.type === "text") {
         var $div = addDivAndLabel(context, type, type.type);
-        basicInput("text", context, type, $div, {
+        basicInput(type.type === "string" ? "text" : "textarea", context, type, $div, {
             pattern:    type.pattern
         ,   minlength:  type.minLength
         ,   maxlength:  type.maxLength
         });
     }
-    else if (type.type === "text")     1; // XXX
     else if (type.type === "number") {
         var $div = addDivAndLabel(context, type, type.type);
         basicInput("number", context, type, $div, {
@@ -67,12 +74,18 @@ function renderType (context, type) {
         ,   max:    type.maximum
         });
     }
-    else if (type.type === "boolean")  1; // XXX
-    else if (type.type === "null")     1; // XXX
-    else if (type.type === "link")     1; // XXX
-    else if (type.type === "any")      1; // XXX
-    else if (!type.type)               1; // XXX
-    else if (isArray(type.type))       1; // subcontent union
+    else if (type.type === "boolean") {
+        var $div = addDivAndLabel(context, type, type.type);
+        basicInput("checkbox", context, type, $div);
+    }
+    else if (type.type === "null") {
+        var $div = addDivAndLabel(context, type, type.type);
+        basicInput("hidden", context, type, $div);
+    }
+    else if (type.type === "link")  { throw new Error("Type link not yet supported"); } // XXX
+    else if (type.type === "any")   { throw new Error("Type any not yet supported"); } // XXX
+    else if (!type.type)            { throw new Error("Type any not yet supported"); } // XXX
+    else if (isArray(type.type))    { throw new Error("Type union not yet supported"); } // XXX
     else if (type.type === "object") {
         var $oldForm;
         if (path !== "$root") {
@@ -92,7 +105,7 @@ function renderType (context, type) {
             $oldForm = null;
         }
     }
-    else if (type.type === "array")    1; // subcontent array
+    else if (type.type === "array") { throw new Error("Type array not yet supported"); } // XXX
     else throw new Error("Unknown schema field type " + type.type + ".");
 }
 
