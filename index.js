@@ -129,7 +129,7 @@ function basic (context, cb) {
         catch (e) {
             return cb(e);
         }
-        $form.append($('<div data-wsf-type="actions"><input type="submit" value="Submit"></div>'));
+        $form.append($('<div data-wsf-type="actions"><button type="submit">Submit</button></div>'));
         cb(null, context);
     });
     

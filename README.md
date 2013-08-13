@@ -81,7 +81,7 @@ The ```<form>``` element looks like this:
 
     <form>
       <!-- ... content goes here -->
-      <div data-wsf-type="actions"><input type="submit" value="Submit" /></div></form>
+      <div data-wsf-type="actions"><button type="submit">Submit</button></div></form>
 
 Use ```hints.form_attrs``` to add attributes to the form element.
 
