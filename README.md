@@ -22,7 +22,7 @@ form generation.
     ,   angular = require("web-schema-forms-angular")
     ;
 
-    var form = WSF.form({
+    var form = wsf.form({
                             extensions: [bootstrap.horizontal, angular]
                         ,   schema: { ... } // web schema
                         ,   hints:  { ... } // rendering hints
@@ -93,8 +93,7 @@ Each field in the schema will add to the content above with lines like the follo
     </div>
 
 The ```data-wsf-type``` attribute captures the type as it was processed. Most of the time that's
-just the schema type, but the submit buttons get ```actions``` and enumerations get
-```enum-$type```.
+just the schema type, but the submit buttons get ```actions``` and enumerations get ```enum-$type```.
 
 The ```<label>``` uses the ```description``` field. For ```id```, ```name```, and ```for``` the
 name of the field is used, but if there are nested objects or arrays it will represent a path to
