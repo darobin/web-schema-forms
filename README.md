@@ -72,3 +72,57 @@ The context object has the same fields described above (and anything else you pr
   but not about the rest of the document.
 
 The callback expects to be called with an error (null on success) and a context.
+
+## Generated HTML
+
+Without extensions, the generated HTML is fairly bare bones.
+
+The ```<form>``` element looks like this:
+
+    <form>
+      <!-- ... content goes here -->
+      <div data-wsf-type="actions"><input type="submit" value="Submit" /></div></form>
+
+Use ```hints.form_attrs``` to add attributes to the form element.
+
+Each field in the schema will add to the content above with lines like the following:
+
+    <div data-wsf-type="string">
+      <label for="str">String</label>
+      <input type="text" id="str" name="str" required="required" />
+    </div>
+
+The ```data-wsf-type``` attribute captures the type as it was processed. Most of the time that's
+just the schema type, but the submit buttons get ```actions``` and enumerations get
+```enum-$type```.
+
+The ```<label>``` uses the ```description``` field. For ```id```, ```name```, and ```for``` the
+name of the field is used, but if there are nested objects or arrays it will represent a path to
+access the value.
+
+Nested objects are placed inside a ```<fieldset>```:
+
+    <fieldset data-wsf-type="object" id="obj">
+      <legend>Nested</legend>
+      <div data-wsf-type="number">
+        <label for="obj.count">Number</label>
+        <input type="number" id="obj.count" name="obj.count" min="2" max="10" />
+      </div>
+    </fieldset>
+
+Enumerations generate a ```<select>``` element, containing the provided options. If it is not
+required, an empty ```<option>``` element is added first.
+
+Different types generate different ```<input>``` element types:
+* string: text
+* number: number
+* boolean: checkbox
+* null: hidden (can be useful as part of a union or array)
+* text: ```<textarea>```
+
+The generated fields are decorated with the ```required```, ```pattern```, ```min```, ```max```,
+```minlength```, ```maxlength``` attributes as needed.
+
+The following Web Schema types are not yet supported: array, union, link, any. They will be added,
+perhaps to the exception of any which I don't know what to do with in such a context (provide a way
+of editing arbitrary JSON?).
