@@ -22,15 +22,15 @@ form generation.
     ,   angular = require("web-schema-forms-angular")
     ;
 
-    var form = wsf.form({
-                            extensions: [bootstrap.horizontal, angular]
-                        ,   schema: { ... } // web schema
-                        ,   hints:  { ... } // rendering hints
-                        }
-                    ,   function (err, form) {
-                            if (err) return console.log("ERROR", err);
-                            // use the form here, it's just generated HTML
-                        }
+    wsf.form({
+            extensions: [bootstrap.horizontal, angular]
+        ,   schema: { ... } // web schema
+        ,   hints:  { ... } // rendering hints
+        }
+    ,   function (err, form) {
+            if (err) return console.log("ERROR", err);
+            // use the form here, it's just generated HTML
+        }
     );
 
 ## Installation
