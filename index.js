@@ -74,6 +74,12 @@ function renderType (context, type) {
         ,   max:    type.maximum
         });
     }
+    else if (type.type === "url") {
+        var $div = addDivAndLabel(context, type, type.type);
+        basicInput("url", context, type, $div, {
+            pattern:    type.pattern
+        });
+    }
     else if (type.type === "boolean") {
         var $div = addDivAndLabel(context, type, type.type);
         basicInput("checkbox", context, type, $div);
@@ -82,10 +88,10 @@ function renderType (context, type) {
         var $div = addDivAndLabel(context, type, type.type);
         basicInput("hidden", context, type, $div);
     }
-    else if (type.type === "link")  { throw new Error("Type link not yet supported"); } // XXX
-    else if (type.type === "any")   { throw new Error("Type any not yet supported"); } // XXX
-    else if (!type.type)            { throw new Error("Type any not yet supported"); } // XXX
-    else if (isArray(type.type))    { throw new Error("Type union not yet supported"); } // XXX
+    else if (isArray(type.type))    { throw new Error("Type union not yet supported in " + JSON.stringify(type, null, 4)); } // XXX
+    else if (type.type === "link")  { throw new Error("Type link not yet supported in " + JSON.stringify(type, null, 4)); } // XXX
+    else if (type.type === "any")   { throw new Error("Type any not yet supported in " + JSON.stringify(type, null, 4)); } // XXX
+    else if (!type.type)            { throw new Error("Type any not yet supported in " + JSON.stringify(type, null, 4)); } // XXX
     else if (type.type === "object") {
         var $oldCurrent;
         if (path !== "$root") {
